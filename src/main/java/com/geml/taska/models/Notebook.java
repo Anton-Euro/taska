@@ -15,9 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing a notebook.
- */
+
 @Entity
 @Table(name = "notebooks")
 @Data
@@ -25,29 +23,28 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Notebook {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String title;
+    private String title;
 
-  private String content;
+    private String content;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-  @ManyToOne
-  @JoinColumn(name = "task_item_id")
-  private TaskItem taskItem;
+    @ManyToOne
+    @JoinColumn(name = "task_item_id")
+    private TaskItem taskItem;
 
-  /**
-   * ManyToMany связь с тегами.
-   */
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "notebook_tags",
-      joinColumns = @JoinColumn(name = "notebook_id"),
-      inverseJoinColumns = @JoinColumn(name = "tag_id"))
-  private Set<Tag> tags;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "notebook_tags", 
+        joinColumns = @JoinColumn(name = "notebook_id"), 
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 }
-

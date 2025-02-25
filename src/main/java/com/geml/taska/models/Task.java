@@ -14,9 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing a task.
- */
+
 @Entity
 @Table(name = "tasks")
 @Data
@@ -24,17 +22,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Task {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String title;
-  private String description;
+    private String title;
+    private String description;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-  @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<TaskItem> taskItems;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskItem> taskItems;
 }

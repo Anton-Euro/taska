@@ -16,82 +16,52 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST контроллер для управления задачами.
- */
+
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
 
-  private final TaskService taskService;
+    private final TaskService taskService;
 
-  /**
-   * Конструктор.
-   *
-   * @param taskService сервис задач
-   */
-  public TaskController(final TaskService taskService) {
-    this.taskService = taskService;
-  }
 
-  /**
-   * Получить все задачи.
-   *
-   * @return список TaskDto
-   */
-  @GetMapping
-  public ResponseEntity<List<DisplayTaskDto>> getAllTasks(
-      @RequestParam(required = false) String title) {
-    List<DisplayTaskDto> tasks = taskService.getAllTasks(title);
-    return ResponseEntity.ok(tasks);
-  }
+    public TaskController(final TaskService taskService) {
+        this.taskService = taskService;
+    }
 
-  /**
-   * Получить задачу по id.
-   *
-   * @param id идентификатор задачи
-   * @return TaskDto
-   */
-  @GetMapping("/{id}")
-  public ResponseEntity<DisplayTaskDto> getTask(@PathVariable Long id) {
-    DisplayTaskDto taskDto = taskService.getTaskById(id);
-    return ResponseEntity.ok(taskDto);
-  }
 
-  /**
-   * Создать задачу.
-   *
-   * @param taskDto объект TaskDto
-   * @return созданный TaskDto
-   */
-  @PostMapping
-  public ResponseEntity<DisplayTaskDto> createTask(@RequestBody CreateTaskDto taskDto) {
-    DisplayTaskDto createdTask = taskService.createTask(taskDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
-  }
+    @GetMapping
+    public ResponseEntity<List<DisplayTaskDto>> getAllTasks(
+            @RequestParam(required = false) String title) {
+        List<DisplayTaskDto> tasks = taskService.getAllTasks(title);
+        return ResponseEntity.ok(tasks);
+    }
 
-  /**
-   * Обновить задачу.
-   *
-   * @param id идентификатор задачи
-   * @param taskDto объект TaskDto
-   * @return обновленный TaskDto
-   */
-  @PutMapping("/{id}")
-  public ResponseEntity<DisplayTaskDto> updateTask(@PathVariable Long id, 
-                                                  @RequestBody CreateTaskDto taskDto) {
-    DisplayTaskDto updatedTask = taskService.updateTask(id, taskDto);
-    return ResponseEntity.ok(updatedTask);
-  }
 
-  /**
-   * Удалить задачу.
-   *
-   * @param id идентификатор задачи
-   */
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-    taskService.deleteTask(id);
-    return ResponseEntity.noContent().build();
-  }
+    @GetMapping("/{id}")
+    public ResponseEntity<DisplayTaskDto> getTask(@PathVariable Long id) {
+        DisplayTaskDto taskDto = taskService.getTaskById(id);
+        return ResponseEntity.ok(taskDto);
+    }
+
+
+    @PostMapping
+    public ResponseEntity<DisplayTaskDto> createTask(@RequestBody CreateTaskDto taskDto) {
+        DisplayTaskDto createdTask = taskService.createTask(taskDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DisplayTaskDto> updateTask(@PathVariable Long id,
+            @RequestBody CreateTaskDto taskDto) {
+        DisplayTaskDto updatedTask = taskService.updateTask(id, taskDto);
+        return ResponseEntity.ok(updatedTask);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -14,82 +14,53 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST контроллер для управления пунктами задач.
- */
+
 @RestController
 @RequestMapping("/api/task-items")
 public class TaskItemController {
 
-  private final TaskItemService taskItemService;
+    private final TaskItemService taskItemService;
 
-  /**
-   * Конструктор.
-   *
-   * @param taskItemService сервис пунктов задач
-   */
-  public TaskItemController(final TaskItemService taskItemService) {
-    this.taskItemService = taskItemService;
-  }
 
-  /**
-   * Получить все пункты задач.
-   *
-   * @return список TaskItemDto
-   */
-  @GetMapping
-  public ResponseEntity<List<DisplayTaskItemDto>> getAllTaskItems() {
-    List<DisplayTaskItemDto> taskItems = taskItemService.getAllTaskItems();
-    return ResponseEntity.ok(taskItems);
-  }
+    public TaskItemController(final TaskItemService taskItemService) {
+        this.taskItemService = taskItemService;
+    }
 
-  /**
-   * Получить пункт задачи по id.
-   *
-   * @param id идентификатор пункта задачи
-   * @return TaskItemDto
-   */
-  @GetMapping("/{id}")
-  public ResponseEntity<DisplayTaskItemDto> getTaskItem(final @PathVariable Long id) {
-    DisplayTaskItemDto taskItem = taskItemService.getTaskItemById(id);
-    return ResponseEntity.ok(taskItem);
-  }
 
-  /**
-   * Создать пункт задачи.
-   *
-   * @param dto объект TaskItemDto
-   * @return созданный TaskItemDto
-   */
-  @PostMapping
-  public ResponseEntity<DisplayTaskItemDto> createTaskItem(final @RequestBody CreateTaskItemDto dto
-  ) {
-    DisplayTaskItemDto createdTaskItem = taskItemService.createTaskItem(dto);
-    return ResponseEntity.status(201).body(createdTaskItem);
-  }
+    @GetMapping
+    public ResponseEntity<List<DisplayTaskItemDto>> getAllTaskItems() {
+        List<DisplayTaskItemDto> taskItems = taskItemService.getAllTaskItems();
+        return ResponseEntity.ok(taskItems);
+    }
 
-  /**
-   * Обновить пункт задачи.
-   *
-   * @param id идентификатор пункта задачи
-   * @param dto объект TaskItemDto
-   * @return обновленный TaskItemDto
-   */
-  @PutMapping("/{id}")
-  public ResponseEntity<DisplayTaskItemDto> updateTaskItem(final @PathVariable Long id,
-                                                    final @RequestBody CreateTaskItemDto dto) {
-    DisplayTaskItemDto updatedTaskItem = taskItemService.updateTaskItem(id, dto);
-    return ResponseEntity.ok(updatedTaskItem);
-  }
 
-  /**
-   * Удалить пункт задачи.
-   *
-   * @param id идентификатор пункта задачи
-   */
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteTaskItem(final @PathVariable Long id) {
-    taskItemService.deleteTaskItem(id);
-    return ResponseEntity.noContent().build();
-  }
+    @GetMapping("/{id}")
+    public ResponseEntity<DisplayTaskItemDto> getTaskItem(final @PathVariable Long id) {
+        DisplayTaskItemDto taskItem = taskItemService.getTaskItemById(id);
+        return ResponseEntity.ok(taskItem);
+    }
+
+
+    @PostMapping
+    public ResponseEntity<DisplayTaskItemDto> createTaskItem(
+        final @RequestBody CreateTaskItemDto dto
+    ) {
+        DisplayTaskItemDto createdTaskItem = taskItemService.createTaskItem(dto);
+        return ResponseEntity.status(201).body(createdTaskItem);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DisplayTaskItemDto> updateTaskItem(final @PathVariable Long id,
+            final @RequestBody CreateTaskItemDto dto) {
+        DisplayTaskItemDto updatedTaskItem = taskItemService.updateTaskItem(id, dto);
+        return ResponseEntity.ok(updatedTaskItem);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTaskItem(final @PathVariable Long id) {
+        taskItemService.deleteTaskItem(id);
+        return ResponseEntity.noContent().build();
+    }
 }

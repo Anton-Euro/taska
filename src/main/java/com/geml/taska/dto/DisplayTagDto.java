@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Data Transfer Object for Tag.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class DisplayTagDto {
 
-  private Long id;
-  private String name;
+    private Long id;
+    private String name;
 }
