@@ -117,14 +117,14 @@ public class NotebookService {
    */
   public DisplayNotebookDto updateNotebook(final Long id, final CreateNotebookDto dto) {
     Notebook nb = notebookRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notebook not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     nb.setTitle(dto.getTitle());
     nb.setContent(dto.getContent());
     if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
       Set<Tag> tags = dto.getTagIds().stream()
           .map(tagId -> tagRepository.findById(tagId)
               .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"))
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND))
               )
           .collect(Collectors.toSet());
       nb.setTags(tags);

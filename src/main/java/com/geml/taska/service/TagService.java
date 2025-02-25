@@ -78,7 +78,7 @@ public class TagService {
    */
   public DisplayTagDto updateTag(final Long id, final CreateTagDto dto) {
     Tag tag = tagRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     tag.setName(dto.getName());
     Tag saved = tagRepository.save(tag);
     return tagMapper.toDisplayTagDto(saved);
@@ -92,7 +92,7 @@ public class TagService {
    */
   public void deleteTag(final Long id) {
     if (!tagRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
     tagRepository.deleteById(id);
   }

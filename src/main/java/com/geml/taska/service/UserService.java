@@ -48,7 +48,7 @@ public class UserService {
    */
   public DisplayUserDto getUserById(final Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     return userMapper.toDisplayUserDto(user);
   }
 
@@ -73,7 +73,7 @@ public class UserService {
    */
   public DisplayUserDto updateUser(final Long id, final CreateUserDto userDto) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     user.setUsername(userDto.getUsername());
     user.setEmail(userDto.getEmail());
@@ -90,7 +90,7 @@ public class UserService {
    */
   public void deleteUser(final Long id) {
     if (!userRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
     userRepository.deleteById(id);
   }

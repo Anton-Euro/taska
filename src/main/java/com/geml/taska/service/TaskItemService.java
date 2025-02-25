@@ -59,7 +59,7 @@ public class TaskItemService {
   public DisplayTaskItemDto getTaskItemById(final Long id) {
     TaskItem item = taskItemRepository.findById(id)
         .orElseThrow(
-          () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task item not found")
+          () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
         );
     return taskItemMapper.toDisplayTaskItemDto(item);
   }
@@ -73,7 +73,7 @@ public class TaskItemService {
   public DisplayTaskItemDto createTaskItem(final CreateTaskItemDto dto) {
     TaskItem item = taskItemMapper.fromCreateTaskItemDto(dto);
     Task task = taskRepository.findById(dto.getTaskId())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     item.setTask(task);
     TaskItem saved = taskItemRepository.save(item);
     return taskItemMapper.toDisplayTaskItemDto(saved);
@@ -89,7 +89,7 @@ public class TaskItemService {
   public DisplayTaskItemDto updateTaskItem(final Long id, final CreateTaskItemDto dto) {
     TaskItem item = taskItemRepository.findById(id)
         .orElseThrow(
-          () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task item not found")
+          () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
         );
     item.setTitle(dto.getTitle());
     item.setCompleted(dto.getCompleted());
@@ -104,7 +104,7 @@ public class TaskItemService {
    */
   public void deleteTaskItem(final Long id) {
     if (!taskItemRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task item not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
     taskItemRepository.deleteById(id);
   }

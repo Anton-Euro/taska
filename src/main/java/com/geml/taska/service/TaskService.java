@@ -70,7 +70,7 @@ public class TaskService {
   public DisplayTaskDto createTask(final CreateTaskDto taskDto) {
     Task task = taskMapper.fromCreateTaskDto(taskDto);
     User user = userRepository.findById(taskDto.getUserId())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     task.setUser(user);
     Task saved = taskRepository.save(task);
     return taskMapper.toDisplayTaskDto(saved);
@@ -85,7 +85,7 @@ public class TaskService {
    */
   public DisplayTaskDto updateTask(final Long id, final CreateTaskDto taskDto) {
     Task task = taskRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     task.setTitle(taskDto.getTitle());
     task.setDescription(taskDto.getDescription());
     Task saved = taskRepository.save(task);
@@ -99,7 +99,7 @@ public class TaskService {
    */
   public void deleteTask(final Long id) {
     if (!taskRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
     taskRepository.deleteById(id);
   }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -50,8 +51,8 @@ public class TaskController {
    * @param id идентификатор задачи
    * @return TaskDto
    */
-  @GetMapping("/{id}")
-  public ResponseEntity<DisplayTaskDto> getTask(@PathVariable Long id) {
+  @GetMapping("/id")
+  public ResponseEntity<DisplayTaskDto> getTask(@RequestParam Long id) {
     DisplayTaskDto taskDto = taskService.getTaskById(id);
     return ResponseEntity.ok(taskDto);
   }
