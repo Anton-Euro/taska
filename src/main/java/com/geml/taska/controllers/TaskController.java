@@ -40,8 +40,9 @@ public class TaskController {
    * @return список TaskDto
    */
   @GetMapping
-  public ResponseEntity<List<DisplayTaskDto>> getAllTasks() {
-    List<DisplayTaskDto> tasks = taskService.getAllTasks();
+  public ResponseEntity<List<DisplayTaskDto>> getAllTasks(
+      @RequestParam(required = false) String title) {
+    List<DisplayTaskDto> tasks = taskService.getAllTasks(title);
     return ResponseEntity.ok(tasks);
   }
 
@@ -51,8 +52,8 @@ public class TaskController {
    * @param id идентификатор задачи
    * @return TaskDto
    */
-  @GetMapping("/id")
-  public ResponseEntity<DisplayTaskDto> getTask(@RequestParam Long id) {
+  @GetMapping("/{id}")
+  public ResponseEntity<DisplayTaskDto> getTask(@PathVariable Long id) {
     DisplayTaskDto taskDto = taskService.getTaskById(id);
     return ResponseEntity.ok(taskDto);
   }

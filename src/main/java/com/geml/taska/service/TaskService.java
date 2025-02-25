@@ -43,10 +43,14 @@ public class TaskService {
    *
    * @return список TaskDto
    */
-  public List<DisplayTaskDto> getAllTasks() {
-    return taskRepository.findAll().stream()
-        .map(taskMapper::toDisplayTaskDto)
-        .collect(Collectors.toList());
+  public List<DisplayTaskDto> getAllTasks(String title) {
+    List<Task> tasks = (title != null && !title.isEmpty())
+        ? taskRepository.searchByTitle(title)
+        : taskRepository.findAll();
+
+    return tasks.stream()
+                .map(taskMapper::toDisplayTaskDto)
+                .collect(Collectors.toList());
   }
 
   /**
