@@ -10,7 +10,6 @@ import com.geml.taska.models.User;
 import com.geml.taska.repository.NotebookRepository;
 import com.geml.taska.repository.TagRepository;
 import com.geml.taska.repository.TaskItemRepository;
-import com.geml.taska.repository.TaskRepository;
 import com.geml.taska.repository.UserRepository;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +33,6 @@ public class NotebookService {
             final NotebookMapper notebookMapper,
             final UserRepository userRepository,
             final TaskItemRepository taskItemRepository,
-            final TaskRepository taskRepository,
             final TagRepository tagRepository) {
         this.notebookRepository = notebookRepository;
         this.notebookMapper = notebookMapper;
@@ -49,8 +47,7 @@ public class NotebookService {
                 ? notebookRepository.searchByTitle(title)
                 : notebookRepository.findAll();
         return notebooks.stream()
-                .map(notebookMapper::toDisplayNotebookDto)
-                .collect(Collectors.toList());
+                .map(notebookMapper::toDisplayNotebookDto).toList();
     }
 
 
