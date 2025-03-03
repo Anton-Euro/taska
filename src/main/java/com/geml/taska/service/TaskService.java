@@ -31,10 +31,10 @@ public class TaskService {
     }
 
 
-    public List<DisplayTaskDto> getAllTasks(String title) {
+    public List<DisplayTaskDto> getAllTasks(final String title) {
         List<Task> tasks = (title != null && !title.isEmpty())
-                ? taskRepository.searchByTitle(title)
-                : taskRepository.findAll();
+            ? taskRepository.searchByTitle(title)
+            : taskRepository.findAll();
 
         return tasks.stream()
                 .map(taskMapper::toDisplayTaskDto)

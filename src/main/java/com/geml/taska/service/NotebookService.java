@@ -44,8 +44,11 @@ public class NotebookService {
     }
 
 
-    public List<DisplayNotebookDto> getAllNotebooks() {
-        return notebookRepository.findAll().stream()
+    public List<DisplayNotebookDto> getAllNotebooks(final String title) {
+        List<Notebook> notebooks = (title != null && !title.isEmpty())
+                ? notebookRepository.searchByTitle(title)
+                : notebookRepository.findAll();
+        return notebooks.stream()
                 .map(notebookMapper::toDisplayNotebookDto)
                 .collect(Collectors.toList());
     }

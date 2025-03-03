@@ -51,8 +51,10 @@ public class TaskItemController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<DisplayTaskItemDto> updateTaskItem(final @PathVariable Long id,
-            final @RequestBody CreateTaskItemDto dto) {
+    public ResponseEntity<DisplayTaskItemDto> updateTaskItem(
+        final @PathVariable Long id,
+        final @RequestBody CreateTaskItemDto dto
+    ) {
         DisplayTaskItemDto updatedTaskItem = taskItemService.updateTaskItem(id, dto);
         return ResponseEntity.ok(updatedTaskItem);
     }

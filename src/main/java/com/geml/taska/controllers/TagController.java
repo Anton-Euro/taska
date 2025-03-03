@@ -48,8 +48,10 @@ public class TagController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<DisplayTagDto> updateTag(final @PathVariable Long id,
-            final @RequestBody CreateTagDto dto) {
+    public ResponseEntity<DisplayTagDto> updateTag(
+        final @PathVariable Long id,
+        final @RequestBody CreateTagDto dto
+    ) {
         return ResponseEntity.ok(tagService.updateTag(id, dto));
     }
 

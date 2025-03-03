@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"tags"})
 public class Notebook {
 
     @Id
@@ -40,7 +42,7 @@ public class Notebook {
     private TaskItem taskItem;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "notebook_tags", 
         joinColumns = @JoinColumn(name = "notebook_id"), 

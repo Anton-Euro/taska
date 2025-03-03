@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -29,8 +30,10 @@ public class NotebookController {
 
 
     @GetMapping
-    public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks() {
-        return ResponseEntity.ok(notebookService.getAllNotebooks());
+    public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks(
+        @RequestParam(required = false) String title
+    ) {
+        return ResponseEntity.ok(notebookService.getAllNotebooks(title));
     }
 
 
@@ -42,15 +45,18 @@ public class NotebookController {
 
     @PostMapping
     public ResponseEntity<DisplayNotebookDto> createNotebook(
-            final @RequestBody CreateNotebookDto dto) {
+        final @RequestBody CreateNotebookDto dto
+    ) {
         DisplayNotebookDto createdNotebook = notebookService.createNotebook(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNotebook);
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<DisplayNotebookDto> updateNotebook(final @PathVariable Long id,
-            final @RequestBody CreateNotebookDto dto) {
+    public ResponseEntity<DisplayNotebookDto> updateNotebook(
+        final @PathVariable Long id,
+        final @RequestBody CreateNotebookDto dto
+    ) {
         return ResponseEntity.ok(notebookService.updateNotebook(id, dto));
     }
 

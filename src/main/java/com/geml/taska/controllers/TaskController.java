@@ -31,9 +31,9 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<List<DisplayTaskDto>> getAllTasks(
-            @RequestParam(required = false) String title) {
-        List<DisplayTaskDto> tasks = taskService.getAllTasks(title);
-        return ResponseEntity.ok(tasks);
+        @RequestParam(required = false) String title
+    ) {
+        return ResponseEntity.ok(taskService.getAllTasks(title));
     }
 
 
@@ -52,8 +52,10 @@ public class TaskController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<DisplayTaskDto> updateTask(@PathVariable Long id,
-            @RequestBody CreateTaskDto taskDto) {
+    public ResponseEntity<DisplayTaskDto> updateTask(
+        @PathVariable Long id,
+        @RequestBody CreateTaskDto taskDto
+    ) {
         DisplayTaskDto updatedTask = taskService.updateTask(id, taskDto);
         return ResponseEntity.ok(updatedTask);
     }
