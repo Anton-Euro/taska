@@ -4,6 +4,7 @@ import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
 import com.geml.taska.service.NotebookService;
 import java.util.List;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +31,7 @@ public class NotebookController {
 
 
     @GetMapping
+    @Cacheable(value = "notebooks", key = "#title != null ? #title : 'ALL_NOTEBOOKS'")
     public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks(
         @RequestParam(required = false) String title
     ) {
