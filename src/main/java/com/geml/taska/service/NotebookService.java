@@ -6,12 +6,13 @@ import com.geml.taska.dto.DisplayNotebookFullDto;
 import com.geml.taska.mapper.NotebookMapper;
 import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Tag;
-import com.geml.taska.models.TaskItem;
+import com.geml.taska.models.Task;
 import com.geml.taska.models.User;
 import com.geml.taska.repository.NotebookRepository;
 import com.geml.taska.repository.TagRepository;
-import com.geml.taska.repository.TaskItemRepository;
+import com.geml.taska.repository.TaskRepository;
 import com.geml.taska.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,19 +27,19 @@ public class NotebookService {
     private final NotebookRepository notebookRepository;
     private final NotebookMapper notebookMapper;
     private final UserRepository userRepository;
-    private final TaskItemRepository taskItemRepository;
+    private final TaskRepository taskRepository;
     private final TagRepository tagRepository;
 
 
     public NotebookService(final NotebookRepository notebookRepository,
             final NotebookMapper notebookMapper,
             final UserRepository userRepository,
-            final TaskItemRepository taskItemRepository,
+            final TaskRepository taskRepository,
             final TagRepository tagRepository) {
         this.notebookRepository = notebookRepository;
         this.notebookMapper = notebookMapper;
         this.userRepository = userRepository;
-        this.taskItemRepository = taskItemRepository;
+        this.taskRepository = taskRepository;
         this.tagRepository = tagRepository;
     }
 
@@ -74,11 +75,11 @@ public class NotebookService {
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         );
         nb.setUser(user);
-        if (dto.getTaskItemId() != null) {
-            TaskItem taskItem = taskItemRepository.findById(dto.getTaskItemId()).orElseThrow(
+        if (dto.getTaskId() != null) {
+            Task taskItem = taskRepository.findById(dto.getTaskId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task item not found")
             );
-            nb.setTaskItem(taskItem);
+            nb.setTask(taskItem);
         }
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
             Set<Tag> tags = dto.getTagIds().stream()
@@ -110,7 +111,7 @@ public class NotebookService {
         return notebookMapper.toDisplayNotebookDto(saved);
     }
 
-
+    @Transactional
     public void deleteNotebook(final Long id) {
         if (!notebookRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notebook not found");
