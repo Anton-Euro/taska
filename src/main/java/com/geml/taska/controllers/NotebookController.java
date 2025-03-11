@@ -2,6 +2,7 @@ package com.geml.taska.controllers;
 
 import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
+import com.geml.taska.dto.DisplayNotebookFullDto;
 import com.geml.taska.service.NotebookService;
 import java.util.List;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,11 +32,19 @@ public class NotebookController {
 
 
     @GetMapping
-    @Cacheable(value = "notebooks", key = "#title != null ? #title : 'ALL_NOTEBOOKS'")
     public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks(
         @RequestParam(required = false) String title
     ) {
         return ResponseEntity.ok(notebookService.getAllNotebooks(title));
+    }
+
+
+    @GetMapping("/full")
+    @Cacheable(value = "notebooks", key = "#title != null ? #title : 'ALL_NOTEBOOKS'")
+    public ResponseEntity<List<DisplayNotebookFullDto>> getAllNotebooksFull(
+            @RequestParam(required = false) String title
+    ) {
+        return ResponseEntity.ok(notebookService.getAllNotebooksFull(title));
     }
 
 

@@ -1,6 +1,5 @@
 package com.geml.taska.models;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -43,7 +42,7 @@ public class Notebook {
     private TaskItem taskItem;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "notebook_tags", 
         joinColumns = @JoinColumn(name = "notebook_id"), 

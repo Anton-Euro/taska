@@ -2,6 +2,8 @@ package com.geml.taska.mapper;
 
 import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
+import com.geml.taska.dto.DisplayNotebookFullDto;
+import com.geml.taska.dto.DisplayTagDto;
 import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Tag;
 import java.util.HashSet;
@@ -12,6 +14,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotebookMapper {
+    private final UserMapper userMapper;
+    private final TaskItemMapper taskItemMapper;
+    private final TagMapper tagMapper;
+
+    public NotebookMapper(
+        UserMapper userMapper, 
+        TaskItemMapper taskItemMapper, 
+        TagMapper tagMapper
+    ) {
+        this.userMapper = userMapper;
+        this.taskItemMapper = taskItemMapper;
+        this.tagMapper = tagMapper;
+    }
 
     public DisplayNotebookDto toDisplayNotebookDto(final Notebook nb) {
         Set<Long> tagIds = new HashSet<>();
@@ -25,6 +40,23 @@ public class NotebookMapper {
                 nb.getUser().getId(),
                 nb.getTaskItem() != null ? nb.getTaskItem().getId() : null,
                 tagIds);
+    }
+
+    public DisplayNotebookFullDto toDisplayNotebookFullDto(final Notebook nb) {
+        Set<DisplayTagDto> tags = new HashSet<>();
+        if (nb.getTags() != null) {
+            tags = nb.getTags().stream()
+                .map(tagMapper::toDisplayTagDto).collect(Collectors.toSet());
+        }
+        return new DisplayNotebookFullDto(
+                nb.getId(),
+                nb.getTitle(),
+                nb.getContent(),
+                userMapper.toDisplayUserDto(nb.getUser()),
+                nb.getTaskItem() != null ? taskItemMapper.toDisplayTaskItemDto(
+                    nb.getTaskItem()
+                ) : null,
+                tags);
     }
 
 
