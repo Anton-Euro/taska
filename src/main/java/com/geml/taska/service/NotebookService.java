@@ -2,6 +2,7 @@ package com.geml.taska.service;
 
 import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
+import com.geml.taska.dto.DisplayNotebookFullDto;
 import com.geml.taska.mapper.NotebookMapper;
 import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Tag;
@@ -48,6 +49,14 @@ public class NotebookService {
                 : notebookRepository.findAll();
         return notebooks.stream()
                 .map(notebookMapper::toDisplayNotebookDto).toList();
+    }
+
+    public List<DisplayNotebookFullDto> getAllNotebooksFull(final String title) {
+        List<Notebook> notebooks = (title != null && !title.isEmpty())
+                ? notebookRepository.searchByTitle(title)
+                : notebookRepository.findAll();
+        return notebooks.stream()
+                .map(notebookMapper::toDisplayNotebookFullDto).toList();
     }
 
 
