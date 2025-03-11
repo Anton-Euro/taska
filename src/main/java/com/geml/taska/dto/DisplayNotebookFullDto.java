@@ -15,6 +15,6 @@ public class DisplayNotebookFullDto {
     private String title;
     private String content;
     private DisplayUserDto user;
-    private DisplayTaskItemDto taskItem;
+    private DisplayTaskDto task;
     private Set<DisplayTagDto> tags;
 }

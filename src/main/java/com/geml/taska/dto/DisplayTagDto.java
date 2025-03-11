@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 public class DisplayTagDto {
 
     private Long id;
+    private Long userId;
     private String name;
 }

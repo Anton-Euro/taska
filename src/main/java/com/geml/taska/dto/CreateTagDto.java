@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateTagDto {
 
+    private Long userId;
     private String name;
 }

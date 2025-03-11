@@ -4,7 +4,6 @@ import com.geml.taska.dto.CreateTaskDto;
 import com.geml.taska.dto.DisplayTaskDto;
 import com.geml.taska.service.TaskService;
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -30,39 +28,40 @@ public class TaskController {
 
 
     @GetMapping
-    public ResponseEntity<List<DisplayTaskDto>> getAllTasks(
-        @RequestParam(required = false) String title
-    ) {
-        return ResponseEntity.ok(taskService.getAllTasks(title));
+    public ResponseEntity<List<DisplayTaskDto>> getAllTasks() {
+        List<DisplayTaskDto> tasks = taskService.getAllTasks();
+        return ResponseEntity.ok(tasks);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<DisplayTaskDto> getTask(@PathVariable Long id) {
-        DisplayTaskDto taskDto = taskService.getTaskById(id);
-        return ResponseEntity.ok(taskDto);
+    public ResponseEntity<DisplayTaskDto> getTask(final @PathVariable Long id) {
+        DisplayTaskDto task = taskService.getTaskById(id);
+        return ResponseEntity.ok(task);
     }
 
 
     @PostMapping
-    public ResponseEntity<DisplayTaskDto> createTask(@RequestBody CreateTaskDto taskDto) {
-        DisplayTaskDto createdTask = taskService.createTask(taskDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+    public ResponseEntity<DisplayTaskDto> createTask(
+        final @RequestBody CreateTaskDto dto
+    ) {
+        DisplayTaskDto createdTask = taskService.createTask(dto);
+        return ResponseEntity.status(201).body(createdTask);
     }
 
 
     @PutMapping("/{id}")
     public ResponseEntity<DisplayTaskDto> updateTask(
-        @PathVariable Long id,
-        @RequestBody CreateTaskDto taskDto
+        final @PathVariable Long id,
+        final @RequestBody CreateTaskDto dto
     ) {
-        DisplayTaskDto updatedTask = taskService.updateTask(id, taskDto);
+        DisplayTaskDto updatedTask = taskService.updateTask(id, dto);
         return ResponseEntity.ok(updatedTask);
     }
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTask(final @PathVariable Long id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
     }

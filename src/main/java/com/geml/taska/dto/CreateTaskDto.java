@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class CreateTaskDto {
 
     private String title;
-    private String description;
-    private Long userId;
+    private Boolean completed;
+    private Long taskBoardId;
 }

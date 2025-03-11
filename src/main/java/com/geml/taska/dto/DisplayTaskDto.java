@@ -12,6 +12,6 @@ public class DisplayTaskDto {
 
     private Long id;
     private String title;
-    private String description;
-    private Long userId;
+    private Boolean completed;
+    private Long taskBoardId;
 }

@@ -10,16 +10,20 @@ import org.springframework.stereotype.Component;
 public class TaskMapper {
 
 
-    public DisplayTaskDto toDisplayTaskDto(final Task task) {
-        return new DisplayTaskDto(task.getId(), task.getTitle(), task.getDescription(),
-                task.getUser().getId());
+    public DisplayTaskDto toDisplayTaskDto(final Task item) {
+        return new DisplayTaskDto(
+            item.getId(), 
+            item.getTitle(), 
+            item.getCompleted(),
+            item.getTaskBoard().getId()
+        );
     }
 
 
-    public Task fromCreateTaskDto(final CreateTaskDto dto) {
-        Task task = new Task();
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        return task;
+    public Task fromCreateTaskItemDto(final CreateTaskDto dto) {
+        Task item = new Task();
+        item.setTitle(dto.getTitle());
+        item.setCompleted(dto.getCompleted());
+        return item;
     }
 }

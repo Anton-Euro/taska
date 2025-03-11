@@ -13,6 +13,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 
 @Entity
@@ -27,12 +29,13 @@ public class Task {
     private Long id;
 
     private String title;
-    private String description;
+    private Boolean completed;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "task_board_id", nullable = false)
+    private TaskBoard taskBoard;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskItem> taskItems;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Notebook> notebooks;
 }

@@ -11,7 +11,7 @@ public class TagMapper {
 
 
     public DisplayTagDto toDisplayTagDto(final Tag tag) {
-        return new DisplayTagDto(tag.getId(), tag.getName());
+        return new DisplayTagDto(tag.getId(), tag.getUser().getId(), tag.getName());
     }
 
 

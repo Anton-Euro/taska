@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DisplayTaskItemDto {
+public class DisplayTaskBoardDto {
 
     private Long id;
     private String title;
-    private Boolean completed;
-    private Long taskId;
+    private String description;
+    private Long userId;
 }
