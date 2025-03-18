@@ -12,7 +12,6 @@ public class CreateNotebookDto {
 
     private String title;
     private String content;
-    private Long userId;
     private Long taskId;
     private Set<Long> tagIds;
 }

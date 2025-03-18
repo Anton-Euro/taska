@@ -4,11 +4,9 @@ import com.geml.taska.dto.CreateUserDto;
 import com.geml.taska.dto.DisplayUserDto;
 import com.geml.taska.mapper.UserMapper;
 import com.geml.taska.models.Board;
-import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Tag;
 import com.geml.taska.models.User;
 import com.geml.taska.repository.BoardRepository;
-import com.geml.taska.repository.NotebookRepository;
 import com.geml.taska.repository.TagRepository;
 import com.geml.taska.repository.UserRepository;
 import java.util.List;
@@ -26,10 +24,8 @@ public class UserService {
     private final UserMapper userMapper;
     private final BoardRepository boardRepository;
     private final TagRepository tagRepository;
-    private final NotebookRepository notebookRepository;
     private final BoardService boardService;
     private final TagService tagService;
-    private final NotebookService notebookService;
 
 
     public UserService(
@@ -37,19 +33,15 @@ public class UserService {
         final UserMapper userMapper,
         final BoardRepository boardRepository,
         final TagRepository tagRepository,
-        final NotebookRepository notebookRepository,
         final BoardService boardService,
-        final TagService tagService,
-        final NotebookService notebookService
+        final TagService tagService
     ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.boardRepository = boardRepository;
         this.tagRepository = tagRepository;
-        this.notebookRepository = notebookRepository;
         this.boardService = boardService;
         this.tagService = tagService;
-        this.notebookService = notebookService;
     }
 
 
@@ -95,17 +87,12 @@ public class UserService {
 
         List<Board> taskBoards = boardRepository.findByUserId(id);
         taskBoards.forEach(taskBoard -> {
-            boardService.deleteTaskBoard(taskBoard.getId());
+            boardService.deleteBoard(taskBoard.getId());
         });
 
         List<Tag> tags = tagRepository.findByUserId(id);
         tags.forEach(tag -> {
             tagService.deleteTag(tag.getId());
-        });
-
-        List<Notebook> notebooks = notebookRepository.findByUserId(id);
-        notebooks.forEach(notebook -> {
-            notebookService.deleteNotebook(notebook.getId());
         });
 
         userRepository.delete(user);

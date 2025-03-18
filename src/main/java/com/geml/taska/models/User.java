@@ -34,9 +34,6 @@ public class User {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Board> boards;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<Notebook> notebooks;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)

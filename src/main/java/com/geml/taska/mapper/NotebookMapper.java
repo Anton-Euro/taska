@@ -14,16 +14,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotebookMapper {
-    private final UserMapper userMapper;
     private final TaskMapper taskMapper;
     private final TagMapper tagMapper;
 
     public NotebookMapper(
-        UserMapper userMapper, 
         TaskMapper taskMapper, 
         TagMapper tagMapper
     ) {
-        this.userMapper = userMapper;
         this.taskMapper = taskMapper;
         this.tagMapper = tagMapper;
     }
@@ -37,7 +34,6 @@ public class NotebookMapper {
                 nb.getId(),
                 nb.getTitle(),
                 nb.getContent(),
-                nb.getUser().getId(),
                 nb.getTask() != null ? nb.getTask().getId() : null,
                 tagIds);
     }
@@ -52,7 +48,6 @@ public class NotebookMapper {
                 nb.getId(),
                 nb.getTitle(),
                 nb.getContent(),
-                userMapper.toDisplayUserDto(nb.getUser()),
                 nb.getTask() != null ? taskMapper.toDisplayTaskDto(
                     nb.getTask()
                 ) : null,

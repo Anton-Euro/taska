@@ -56,16 +56,16 @@ public class BoardController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayBoardDto> updateBoard(
         @PathVariable Long id,
-        @RequestBody CreateBoardDto taskBoardDto
+        @RequestBody CreateBoardDto boardDto
     ) {
-        DisplayBoardDto updatedTaskBoard = boardService.updateTaskBoard(id, taskBoardDto);
-        return ResponseEntity.ok(updatedTaskBoard);
+        DisplayBoardDto updatedBoard = boardService.updateBoard(id, boardDto);
+        return ResponseEntity.ok(updatedBoard);
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
-        boardService.deleteTaskBoard(id);
+        boardService.deleteBoard(id);
         return ResponseEntity.noContent().build();
     }
 }

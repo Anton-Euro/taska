@@ -16,6 +16,4 @@ public interface NotebookRepository extends JpaRepository<Notebook, Long> {
     Set<Notebook> findByTagsId(Long tagId);
 
     List<Notebook> findByTaskId(Long taskId);
-
-    List<Notebook> findByUserId(Long userId);
 }

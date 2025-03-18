@@ -14,7 +14,6 @@ public class DisplayNotebookFullDto {
     private Long id;
     private String title;
     private String content;
-    private DisplayUserDto user;
     private DisplayTaskDto task;
     private Set<DisplayTagDto> tags;
 }

@@ -70,18 +70,18 @@ public class BoardService {
     }
 
 
-    public DisplayBoardDto updateTaskBoard(final Long id, final CreateBoardDto taskDto) {
-        Board taskBoard = boardRepository.findById(id)
+    public DisplayBoardDto updateBoard(final Long id, final CreateBoardDto taskDto) {
+        Board board = boardRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        taskBoard.setTitle(taskDto.getTitle());
-        taskBoard.setDescription(taskDto.getDescription());
-        Board saved = boardRepository.save(taskBoard);
+        board.setTitle(taskDto.getTitle());
+        board.setDescription(taskDto.getDescription());
+        Board saved = boardRepository.save(board);
         return boardMapper.toDisplayBoardDto(saved);
     }
 
     @Transactional
-    public void deleteTaskBoard(final Long id) {
-        Board taskBoard = boardRepository.findById(id).orElseThrow(
+    public void deleteBoard(final Long id) {
+        Board board = boardRepository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task board not found")
         );
 
@@ -90,6 +90,6 @@ public class BoardService {
         tasks.forEach(task -> {
             taskService.deleteTask(task.getId());
         });
-        boardRepository.delete(taskBoard);
+        boardRepository.delete(board);
     }
 }
