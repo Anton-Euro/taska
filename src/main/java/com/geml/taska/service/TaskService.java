@@ -3,11 +3,11 @@ package com.geml.taska.service;
 import com.geml.taska.dto.CreateTaskDto;
 import com.geml.taska.dto.DisplayTaskDto;
 import com.geml.taska.mapper.TaskMapper;
+import com.geml.taska.models.Board;
 import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Task;
-import com.geml.taska.models.TaskBoard;
+import com.geml.taska.repository.BoardRepository;
 import com.geml.taska.repository.NotebookRepository;
-import com.geml.taska.repository.TaskBoardRepository;
 import com.geml.taska.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -23,7 +23,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     private final NotebookRepository notebookRepository;
-    private final TaskBoardRepository taskBoardRepository;
+    private final BoardRepository boardRepository;
     private final NotebookService notebookService;
 
 
@@ -31,13 +31,13 @@ public class TaskService {
         final TaskRepository taskRepository,
         final TaskMapper taskMapper,
         final NotebookRepository notebookRepository,
-        final TaskBoardRepository taskBoardRepository,
+        final BoardRepository boardRepository,
         final NotebookService notebookService    
     ) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
         this.notebookRepository = notebookRepository;
-        this.taskBoardRepository = taskBoardRepository;
+        this.boardRepository = boardRepository;
         this.notebookService = notebookService;
     }
 
@@ -60,11 +60,11 @@ public class TaskService {
 
     public DisplayTaskDto createTask(final CreateTaskDto dto) {
         Task item = taskMapper.fromCreateTaskItemDto(dto);
-        TaskBoard task = taskBoardRepository.findById(dto.getTaskBoardId())
+        Board task = boardRepository.findById(dto.getBoardId())
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
             );
-        item.setTaskBoard(task);
+        item.setBoard(task);
         Task saved = taskRepository.save(item);
         return taskMapper.toDisplayTaskDto(saved);
     }

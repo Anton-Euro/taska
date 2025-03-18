@@ -13,5 +13,5 @@ public class DisplayTaskDto {
     private Long id;
     private String title;
     private Boolean completed;
-    private Long taskBoardId;
+    private Long boardId;
 }

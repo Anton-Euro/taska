@@ -32,8 +32,8 @@ public class Task {
     private Boolean completed;
 
     @ManyToOne
-    @JoinColumn(name = "task_board_id", nullable = false)
-    private TaskBoard taskBoard;
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)

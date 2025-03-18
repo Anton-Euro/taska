@@ -12,5 +12,5 @@ public class CreateTaskDto {
 
     private String title;
     private Boolean completed;
-    private Long taskBoardId;
+    private Long boardId;
 }

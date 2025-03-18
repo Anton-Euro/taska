@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateTaskBoardDto {
+public class DisplayBoardDto {
 
+    private Long id;
     private String title;
     private String description;
     private Long userId;

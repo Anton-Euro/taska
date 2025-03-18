@@ -15,7 +15,7 @@ public class TaskMapper {
             item.getId(), 
             item.getTitle(), 
             item.getCompleted(),
-            item.getTaskBoard().getId()
+            item.getBoard().getId()
         );
     }
 

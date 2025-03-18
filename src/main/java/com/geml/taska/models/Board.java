@@ -18,11 +18,11 @@ import org.hibernate.annotations.OnDeleteAction;
 
 
 @Entity
-@Table(name = "task_boards")
+@Table(name = "boards")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskBoard {
+public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class TaskBoard {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "taskBoard", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Task> tasks;
 }
