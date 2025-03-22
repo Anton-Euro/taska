@@ -38,3 +38,4 @@ out/
 .vscode/
 
 .DS_Store
+logs/

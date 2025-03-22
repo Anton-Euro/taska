@@ -1,5 +1,6 @@
 package com.geml.taska.service;
 
+import com.geml.taska.config.CacheConfig;
 import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
 import com.geml.taska.dto.DisplayNotebookFullDto;
@@ -26,33 +27,54 @@ public class NotebookService {
     private final NotebookMapper notebookMapper;
     private final TaskRepository taskRepository;
     private final TagRepository tagRepository;
+    private final CacheConfig cacheConfig;
 
 
-    public NotebookService(final NotebookRepository notebookRepository,
-            final NotebookMapper notebookMapper,
-            final TaskRepository taskRepository,
-            final TagRepository tagRepository) {
+    public NotebookService(
+        final NotebookRepository notebookRepository,
+        final NotebookMapper notebookMapper,
+        final TaskRepository taskRepository,
+        final TagRepository tagRepository,
+        final CacheConfig cacheConfig
+    ) {
         this.notebookRepository = notebookRepository;
         this.notebookMapper = notebookMapper;
         this.taskRepository = taskRepository;
         this.tagRepository = tagRepository;
+        this.cacheConfig = cacheConfig;
     }
 
 
-    public List<DisplayNotebookDto> getAllNotebooks(final String title) {
+    public List<DisplayNotebookDto> getAllNotebooks() {
+        List<DisplayNotebookDto> cachedNotebooks = cacheConfig.getAllNotebooks();
+        if (cachedNotebooks != null) {
+            return cachedNotebooks;
+        }
+
+        List<DisplayNotebookDto> notebooks = notebookRepository.findAll().stream()
+                .map(notebookMapper::toDisplayNotebookDto).toList();
+        cacheConfig.putAllNotebooks(notebooks);
+        return notebooks;
+    }
+
+    public List<DisplayNotebookFullDto> getAllNotebooksFull() {
+        List<DisplayNotebookFullDto> cachedNotebooks = cacheConfig.getAllNotebooksFull();
+        if (cachedNotebooks != null) {
+            return cachedNotebooks;
+        }
+
+        List<DisplayNotebookFullDto> notebooks = notebookRepository.findAll().stream()
+                .map(notebookMapper::toDisplayNotebookFullDto).toList();
+        cacheConfig.putAllNotebooksFull(notebooks);
+        return notebooks;
+    }
+
+    public List<DisplayNotebookDto> getAllNotebooksSearch(final String title) {
         List<Notebook> notebooks = (title != null && !title.isEmpty())
                 ? notebookRepository.searchByTitle(title)
                 : notebookRepository.findAll();
         return notebooks.stream()
                 .map(notebookMapper::toDisplayNotebookDto).toList();
-    }
-
-    public List<DisplayNotebookFullDto> getAllNotebooksFull(final String title) {
-        List<Notebook> notebooks = (title != null && !title.isEmpty())
-                ? notebookRepository.searchByTitle(title)
-                : notebookRepository.findAll();
-        return notebooks.stream()
-                .map(notebookMapper::toDisplayNotebookFullDto).toList();
     }
 
 
@@ -81,6 +103,8 @@ public class NotebookService {
             nb.setTags(tags);
         }
         Notebook saved = notebookRepository.save(nb);
+        cacheConfig.removeAllNotebooks();
+        cacheConfig.removeAllNotebooksFull();
         return notebookMapper.toDisplayNotebookDto(saved);
     }
 
@@ -99,6 +123,8 @@ public class NotebookService {
             nb.setTags(tags);
         }
         Notebook saved = notebookRepository.save(nb);
+        cacheConfig.removeAllNotebooks();
+        cacheConfig.removeAllNotebooksFull();
         return notebookMapper.toDisplayNotebookDto(saved);
     }
 
@@ -108,5 +134,7 @@ public class NotebookService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notebook not found");
         }
         notebookRepository.deleteById(id);
+        cacheConfig.removeAllNotebooks();
+        cacheConfig.removeAllNotebooksFull();
     }
 }
