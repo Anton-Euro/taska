@@ -3,6 +3,7 @@ package com.geml.taska.controllers;
 import com.geml.taska.dto.CreateTagDto;
 import com.geml.taska.dto.DisplayTagDto;
 import com.geml.taska.service.TagService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class TagController {
 
 
     @PostMapping
-    public ResponseEntity<DisplayTagDto> createTag(final @RequestBody CreateTagDto dto) {
+    public ResponseEntity<DisplayTagDto> createTag(final @Valid @RequestBody CreateTagDto dto) {
         DisplayTagDto createdTag = tagService.createTag(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
     }
@@ -50,7 +51,7 @@ public class TagController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayTagDto> updateTag(
         final @PathVariable Long id,
-        final @RequestBody CreateTagDto dto
+        final @Valid @RequestBody CreateTagDto dto
     ) {
         return ResponseEntity.ok(tagService.updateTag(id, dto));
     }

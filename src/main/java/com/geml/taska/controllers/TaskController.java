@@ -3,6 +3,7 @@ package com.geml.taska.controllers;
 import com.geml.taska.dto.CreateTaskDto;
 import com.geml.taska.dto.DisplayTaskDto;
 import com.geml.taska.service.TaskService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +44,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<DisplayTaskDto> createTask(
-        final @RequestBody CreateTaskDto dto
+        final @Valid @RequestBody CreateTaskDto dto
     ) {
         DisplayTaskDto createdTask = taskService.createTask(dto);
         return ResponseEntity.status(201).body(createdTask);
@@ -53,7 +54,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayTaskDto> updateTask(
         final @PathVariable Long id,
-        final @RequestBody CreateTaskDto dto
+        final @Valid @RequestBody CreateTaskDto dto
     ) {
         DisplayTaskDto updatedTask = taskService.updateTask(id, dto);
         return ResponseEntity.ok(updatedTask);

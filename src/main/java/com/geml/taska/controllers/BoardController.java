@@ -3,6 +3,7 @@ package com.geml.taska.controllers;
 import com.geml.taska.dto.CreateBoardDto;
 import com.geml.taska.dto.DisplayBoardDto;
 import com.geml.taska.service.BoardService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class BoardController {
 
     @PostMapping
     public ResponseEntity<DisplayBoardDto> createBoard(
-        @RequestBody CreateBoardDto boardDto
+        @Valid @RequestBody CreateBoardDto boardDto
     ) {
         DisplayBoardDto createdBoard = boardService.createBoard(boardDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBoard);
@@ -56,7 +57,7 @@ public class BoardController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayBoardDto> updateBoard(
         @PathVariable Long id,
-        @RequestBody CreateBoardDto boardDto
+        @Valid @RequestBody CreateBoardDto boardDto
     ) {
         DisplayBoardDto updatedBoard = boardService.updateBoard(id, boardDto);
         return ResponseEntity.ok(updatedBoard);

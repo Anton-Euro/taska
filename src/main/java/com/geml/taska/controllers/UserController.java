@@ -3,6 +3,7 @@ package com.geml.taska.controllers;
 import com.geml.taska.dto.CreateUserDto;
 import com.geml.taska.dto.DisplayUserDto;
 import com.geml.taska.service.UserService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<DisplayUserDto> createUser(
-        final @RequestBody CreateUserDto createUserDto
+        final @Valid @RequestBody CreateUserDto createUserDto
     ) {
         DisplayUserDto createdUser = userService.createUser(createUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
@@ -53,7 +54,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayUserDto> updateUser(
         final @PathVariable Long id,
-        final @RequestBody CreateUserDto createUserDto
+        final @Valid @RequestBody CreateUserDto createUserDto
     ) {
         DisplayUserDto updatedUser = userService.updateUser(id, createUserDto);
         return ResponseEntity.ok(updatedUser);

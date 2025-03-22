@@ -4,6 +4,7 @@ import com.geml.taska.dto.CreateNotebookDto;
 import com.geml.taska.dto.DisplayNotebookDto;
 import com.geml.taska.dto.DisplayNotebookFullDto;
 import com.geml.taska.service.NotebookService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,7 @@ public class NotebookController {
 
     @PostMapping
     public ResponseEntity<DisplayNotebookDto> createNotebook(
-        final @RequestBody CreateNotebookDto dto
+        final @Valid @RequestBody CreateNotebookDto dto
     ) {
         DisplayNotebookDto createdNotebook = notebookService.createNotebook(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNotebook);
@@ -67,7 +68,7 @@ public class NotebookController {
     @PutMapping("/{id}")
     public ResponseEntity<DisplayNotebookDto> updateNotebook(
         final @PathVariable Long id,
-        final @RequestBody CreateNotebookDto dto
+        final @Valid @RequestBody CreateNotebookDto dto
     ) {
         return ResponseEntity.ok(notebookService.updateNotebook(id, dto));
     }
