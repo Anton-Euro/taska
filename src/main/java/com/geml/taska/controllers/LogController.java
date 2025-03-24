@@ -1,5 +1,12 @@
 package com.geml.taska.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,17 +28,25 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/logs")
+@Tag(name = "Log", description = "API для управления логами")
 public class LogController {
 
     private static final String LOG_DIRECTORY = "logs/";
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-    private static final DateTimeFormatter DATE_FORMATTER = 
+    private static final DateTimeFormatter DATE_FORMATTER =
         DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
+    @Operation(summary = "Получить лог файл по дате и ротации", description = "Возвращает лог файл за указанную дату и номер ротации.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Лог файл успешно получен",
+            content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "binary"))),
+        @ApiResponse(responseCode = "404", description = "Лог файл не найден", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Ошибка при чтении лог файла", content = @Content)
+    })
     @GetMapping("/{date}")
     public ResponseEntity<Resource> getLogFileByDate(
-            @PathVariable String date,
-            @RequestParam Integer rotation
+        @Parameter(description = "Дата лога в формате YYYY-MM-DD", example = "2023-10-27") @PathVariable String date,
+        @Parameter(description = "Номер ротации лога", example = "0") @RequestParam Integer rotation
     ) {
         try {
             LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
@@ -59,9 +74,9 @@ public class LogController {
             headers.setContentType(MediaType.TEXT_PLAIN);
 
             return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(Files.size(logFilePath))
-                    .body(resource);
+                .headers(headers)
+                .contentLength(Files.size(logFilePath))
+                .body(resource);
 
         } catch (IOException e) {
             throw new ResponseStatusException(
@@ -71,8 +86,17 @@ public class LogController {
         }
     }
 
+    @Operation(summary = "Получить все лог файлы за дату", description = "Возвращает все лог файлы за указанную дату, включая все ротации.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Лог файлы успешно получены",
+            content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "binary"))),
+        @ApiResponse(responseCode = "404", description = "Лог файлы не найдены", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Ошибка при чтении лог файлов", content = @Content)
+    })
     @GetMapping("/all/{date}")
-    public ResponseEntity<Resource> getAllLogFileByDate(@PathVariable String date) {
+    public ResponseEntity<Resource> getAllLogFileByDate(
+        @Parameter(description = "Дата логов в формате YYYY-MM-DD", example = "2023-10-27") @PathVariable String date
+    ) {
         try {
             LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
             String logFileNamePattern = "app-"
@@ -85,8 +109,8 @@ public class LogController {
 
             java.util.List<Path> matchingFiles = Files.list(logDirectoryPath)
                 .filter(path -> path.getFileName().toString()
-                .matches(logFileNamePattern.replace(".", "\\.")
-                .replace("*", ".*")))
+                    .matches(logFileNamePattern.replace(".", "\\.")
+                        .replace("*", ".*")))
                 .toList();
 
             if (matchingFiles.isEmpty()) {
@@ -108,14 +132,14 @@ public class LogController {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=app-"
-                + logDate.format(DATE_FORMATTER) + ".log"
+                    + logDate.format(DATE_FORMATTER) + ".log"
             );
             headers.setContentType(MediaType.TEXT_PLAIN);
 
             return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(combinedLogContent.length())
-                    .body(resource);
+                .headers(headers)
+                .contentLength(combinedLogContent.length())
+                .body(resource);
 
         } catch (IOException e) {
             throw new ResponseStatusException(
