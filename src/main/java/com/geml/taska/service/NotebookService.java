@@ -63,6 +63,19 @@ public class NotebookService {
         return notebooks;
     }
 
+    public List<DisplayNotebookFullDto> getAllNotebooksFullWithCache() {
+        List<DisplayNotebookFullDto> cachedNotebooks = cacheConfig.getAllNotebooksFull();
+        if (cachedNotebooks != null) {
+            return cachedNotebooks;
+        }
+        List<DisplayNotebookFullDto> notebooks = notebookRepository.findAll().stream()
+            .map(notebookMapper::toDisplayNotebookFullDto).toList();
+ 
+        cacheConfig.putAllNotebooksFull(notebooks);
+        return notebooks;
+    }
+    
+
     public List<DisplayNotebookFullDto> getAllNotebooksFull(String tagName) {
         List<Object[]> results = notebookRepository.findAllNotebooksFullWithTagFilter(tagName);
         return processResults(results);

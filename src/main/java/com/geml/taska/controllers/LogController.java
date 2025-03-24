@@ -25,7 +25,8 @@ public class LogController {
 
     private static final String LOG_DIRECTORY = "logs/";
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+    private static final DateTimeFormatter DATE_FORMATTER = 
+        DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
     @GetMapping("/{date}")
     public ResponseEntity<Resource> getLogFileByDate(
