@@ -24,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class LogController {
 
     private static final String LOG_DIRECTORY = "logs/";
+    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 
     @GetMapping("/{date}")
     public ResponseEntity<Resource> getLogFileByDate(
@@ -36,8 +38,8 @@ public class LogController {
             Path logFilePath;
 
 
-            logFileName = "app-" 
-                + logDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) 
+            logFileName = "app-"
+                + logDate.format(DATE_FORMATTER)
                 + "." + rotation + ".log";
             logFilePath = Paths.get(LOG_DIRECTORY, logFileName);
 
@@ -62,7 +64,7 @@ public class LogController {
 
         } catch (IOException e) {
             throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR, 
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 "Error reading log file", e
             );
         }
@@ -72,8 +74,8 @@ public class LogController {
     public ResponseEntity<Resource> getAllLogFileByDate(@PathVariable String date) {
         try {
             LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
-            String logFileNamePattern = "app-" 
-                + logDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".*.log";
+            String logFileNamePattern = "app-"
+                + logDate.format(DATE_FORMATTER) + ".*.log";
             Path logDirectoryPath = Paths.get(LOG_DIRECTORY);
 
             if (!Files.exists(logDirectoryPath) || !Files.isDirectory(logDirectoryPath)) {
@@ -88,7 +90,7 @@ public class LogController {
 
             if (matchingFiles.isEmpty()) {
                 throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, 
+                    HttpStatus.NOT_FOUND,
                     "Log files not found for date: " + date
                 );
             }
@@ -103,9 +105,9 @@ public class LogController {
             );
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, 
-                "attachment; filename=app-" 
-                + logDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".log"
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=app-"
+                + logDate.format(DATE_FORMATTER) + ".log"
             );
             headers.setContentType(MediaType.TEXT_PLAIN);
 
@@ -116,7 +118,7 @@ public class LogController {
 
         } catch (IOException e) {
             throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR, 
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 "Error reading log files", e
             );
         }

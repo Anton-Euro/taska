@@ -16,4 +16,25 @@ public interface NotebookRepository extends JpaRepository<Notebook, Long> {
     Set<Notebook> findByTagsId(Long tagId);
 
     List<Notebook> findByTaskId(Long taskId);
+
+    @Query(value = """
+        SELECT
+            n.id AS notebook_id,
+            n.title AS notebook_title,
+            n.content AS notebook_content,
+            t.id AS tag_id,
+            t.name AS tag_name,
+            task.id AS task_id,
+            task.title AS task_title
+        FROM
+            notebooks n
+        LEFT JOIN
+            notebook_tags nt ON n.id = nt.notebook_id
+        LEFT JOIN
+            tags t ON nt.tag_id = t.id
+        LEFT JOIN
+            tasks task ON n.task_id = task.id
+        WHERE (:tagName IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :tagName, '%')))
+        """, nativeQuery = true)
+    List<Object[]> findAllNotebooksFullWithTagFilter(@Param("tagName") String tagName);
 }

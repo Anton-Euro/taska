@@ -38,8 +38,10 @@ public class NotebookController {
 
 
     @GetMapping("/all")
-    public ResponseEntity<List<DisplayNotebookFullDto>> getAllNotebooksFull() {
-        return ResponseEntity.ok(notebookService.getAllNotebooksFull());
+    public ResponseEntity<List<DisplayNotebookFullDto>> getAllNotebooksFull(
+        @RequestParam(required = false) String tagName
+    ) {
+        return ResponseEntity.ok(notebookService.getAllNotebooksFull(tagName));
     }
 
     @GetMapping("/search")
