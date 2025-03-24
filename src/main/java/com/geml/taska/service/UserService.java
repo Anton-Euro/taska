@@ -2,6 +2,7 @@ package com.geml.taska.service;
 
 import com.geml.taska.dto.CreateUserDto;
 import com.geml.taska.dto.DisplayUserDto;
+import com.geml.taska.exception.CustomNotFoundException;
 import com.geml.taska.mapper.UserMapper;
 import com.geml.taska.models.Board;
 import com.geml.taska.models.Tag;
@@ -54,7 +55,7 @@ public class UserService {
 
     public DisplayUserDto getUserById(final Long id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new CustomNotFoundException("User not found with id: " + id));
         return userMapper.toDisplayUserDto(user);
     }
 
