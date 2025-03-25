@@ -6,6 +6,7 @@ import com.geml.taska.dto.DisplayNotebookDto;
 import com.geml.taska.dto.DisplayNotebookFullDto;
 import com.geml.taska.dto.DisplayTagDto;
 import com.geml.taska.dto.DisplayTaskDto;
+import com.geml.taska.exception.ValidationException;
 import com.geml.taska.mapper.NotebookMapper;
 import com.geml.taska.models.Notebook;
 import com.geml.taska.models.Tag;
@@ -140,6 +141,17 @@ public class NotebookService {
 
 
     public DisplayNotebookDto createNotebook(final CreateNotebookDto dto) {
+        List<String> errors = new ArrayList<>();
+        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
+            errors.add("Title cannot be empty");
+        }
+        if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            errors.add("Content cannot be empty");
+        }
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
         Notebook nb = notebookMapper.fromCreateNotebookDto(dto);
         if (dto.getTaskId() != null) {
             Task taskItem = taskRepository.findById(dto.getTaskId()).orElseThrow(
@@ -163,6 +175,17 @@ public class NotebookService {
 
 
     public DisplayNotebookDto updateNotebook(final Long id, final CreateNotebookDto dto) {
+        List<String> errors = new ArrayList<>();
+        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
+            errors.add("Title cannot be empty");
+        }
+        if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            errors.add("Content cannot be empty");
+        }
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+        
         Notebook nb = notebookRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         nb.setTitle(dto.getTitle());
