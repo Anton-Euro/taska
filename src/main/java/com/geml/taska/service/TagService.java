@@ -13,30 +13,35 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
+@Slf4j
 public class TagService {
 
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
     private final NotebookRepository notebookRepository;
     private final TagMapper tagMapper;
+    private final NotebookService notebookService;
 
 
     public TagService(
         final TagRepository tagRepository,
         final UserRepository userRepository,
         final NotebookRepository notebookRepository,
-        final TagMapper tagMapper
+        final TagMapper tagMapper,
+        final NotebookService notebookService
     ) {
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
         this.notebookRepository = notebookRepository;
         this.tagMapper = tagMapper;
+        this.notebookService = notebookService;
     }
 
 
@@ -62,6 +67,7 @@ public class TagService {
         );
         tag.setUser(user);
         Tag saved = tagRepository.save(tag);
+        notebookService.invalidateNotebookCache();
         return tagMapper.toDisplayTagDto(saved);
     }
 
@@ -71,6 +77,7 @@ public class TagService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         tag.setName(dto.getName());
         Tag saved = tagRepository.save(tag);
+        notebookService.invalidateNotebookCache();
         return tagMapper.toDisplayTagDto(saved);
     }
 
@@ -85,5 +92,6 @@ public class TagService {
             notebookRepository.save(notebook);
         });
         tagRepository.deleteById(id);
+        notebookService.invalidateNotebookCache();
     }
 }

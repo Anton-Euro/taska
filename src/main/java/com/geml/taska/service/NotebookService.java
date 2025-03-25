@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
+@Slf4j
 public class NotebookService {
 
     private final NotebookRepository notebookRepository;
@@ -55,9 +57,11 @@ public class NotebookService {
     public List<DisplayNotebookDto> getAllNotebooks() {
         List<DisplayNotebookDto> cachedNotebooks = cacheConfig.getAllNotebooks();
         if (cachedNotebooks != null) {
+            log.debug("Getting all notebooks from cache");
             return cachedNotebooks;
         }
 
+        log.debug("Getting all notebooks from database");
         List<DisplayNotebookDto> notebooks = notebookRepository.findAll().stream()
                 .map(notebookMapper::toDisplayNotebookDto).toList();
         cacheConfig.putAllNotebooks(notebooks);
@@ -67,8 +71,10 @@ public class NotebookService {
     public List<DisplayNotebookFullDto> getAllNotebooksFullWithCache() {
         List<DisplayNotebookFullDto> cachedNotebooks = cacheConfig.getAllNotebooksFull();
         if (cachedNotebooks != null) {
+            log.debug("Getting all full notebooks from cache");
             return cachedNotebooks;
         }
+        log.debug("Getting all full notebooks from database");
         List<DisplayNotebookFullDto> notebooks = notebookRepository.findAll().stream()
             .map(notebookMapper::toDisplayNotebookFullDto).toList();
  
@@ -168,8 +174,7 @@ public class NotebookService {
             nb.setTags(tags);
         }
         Notebook saved = notebookRepository.save(nb);
-        cacheConfig.removeAllNotebooks();
-        cacheConfig.removeAllNotebooksFull();
+        invalidateNotebookCache();
         return notebookMapper.toDisplayNotebookDto(saved);
     }
 
@@ -199,8 +204,7 @@ public class NotebookService {
             nb.setTags(tags);
         }
         Notebook saved = notebookRepository.save(nb);
-        cacheConfig.removeAllNotebooks();
-        cacheConfig.removeAllNotebooksFull();
+        invalidateNotebookCache();
         return notebookMapper.toDisplayNotebookDto(saved);
     }
 
@@ -210,6 +214,11 @@ public class NotebookService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notebook not found");
         }
         notebookRepository.deleteById(id);
+        invalidateNotebookCache();
+    }
+    
+    public void invalidateNotebookCache() {
+        log.debug("Invalidating notebook cache");
         cacheConfig.removeAllNotebooks();
         cacheConfig.removeAllNotebooksFull();
     }

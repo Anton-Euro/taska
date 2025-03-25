@@ -12,12 +12,14 @@ import com.geml.taska.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
+@Slf4j
 public class TaskService {
 
     private final TaskRepository taskRepository;
@@ -66,6 +68,7 @@ public class TaskService {
             );
         item.setBoard(task);
         Task saved = taskRepository.save(item);
+        notebookService.invalidateNotebookCache();
         return taskMapper.toDisplayTaskDto(saved);
     }
 
@@ -78,6 +81,7 @@ public class TaskService {
         item.setTitle(dto.getTitle());
         item.setCompleted(dto.getCompleted());
         Task saved = taskRepository.save(item);
+        notebookService.invalidateNotebookCache();
         return taskMapper.toDisplayTaskDto(saved);
     }
 
@@ -94,5 +98,6 @@ public class TaskService {
         });
 
         taskRepository.delete(task);
+        notebookService.invalidateNotebookCache();
     }
 }
