@@ -71,6 +71,29 @@ public class TagService {
         return tagMapper.toDisplayTagDto(saved);
     }
 
+    public List<DisplayTagDto> createTags(List<CreateTagDto> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            throw new IllegalArgumentException("List of CreateTagDto cannot be null or empty");
+        }
+
+        List<Tag> tagsToSave = dtos.stream()
+                .map(dto -> {
+                    Tag tag = tagMapper.fromCreateTagDto(dto);
+                    User user = userRepository.findById(dto.getUserId()).orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found for tag: " + dto.getName())
+                    );
+                    tag.setUser(user);
+                    return tag;
+                })
+                .collect(Collectors.toList());
+
+        List<Tag> savedTags = tagRepository.saveAll(tagsToSave);
+        notebookService.invalidateNotebookCache();
+        return savedTags.stream()
+                .map(tagMapper::toDisplayTagDto)
+                .collect(Collectors.toList());
+    }
+
 
     public DisplayTagDto updateTag(final Long id, final CreateTagDto dto) {
         Tag tag = tagRepository.findById(id)

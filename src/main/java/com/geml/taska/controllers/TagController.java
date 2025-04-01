@@ -5,6 +5,7 @@ import com.geml.taska.dto.DisplayTagDto;
 import com.geml.taska.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,7 +41,7 @@ public class TagController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Список тегов успешно получен",
             content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = DisplayTagDto.class)))
+                array = @ArraySchema(schema = @Schema(implementation = DisplayTagDto.class))))
     })
     @GetMapping
     public ResponseEntity<List<DisplayTagDto>> getAllTags() {
@@ -74,6 +75,21 @@ public class TagController {
     ) {
         DisplayTagDto createdTag = tagService.createTag(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTag);
+    }
+
+    @Operation(summary = "Создать несколько тегов", description = "Создает несколько тегов за один запрос.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Теги успешно созданы",
+                content = @Content(mediaType = "application/json",
+                        array = @ArraySchema(schema = @Schema(implementation = DisplayTagDto.class)))),
+        @ApiResponse(responseCode = "400", description = "Неверные входные данные", content = @Content)
+    })
+    @PostMapping("/bulk")
+    public ResponseEntity<List<DisplayTagDto>> createTagsBulk(
+            @Parameter(description = "Список данных для создания тегов") @Valid @RequestBody List<CreateTagDto> createTagDtos
+    ) {
+        List<DisplayTagDto> createdTags = tagService.createTags(createTagDtos);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTags);
     }
 
     @Operation(summary = "Обновить тег", description = "Обновляет существующий тег.")
