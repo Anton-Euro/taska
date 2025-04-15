@@ -1,8 +1,8 @@
 package com.geml.taska.controllers;
 
 import com.geml.taska.dto.LogCreationStatusDto;
+import com.geml.taska.models.LogFile;
 import com.geml.taska.service.AsyncLogService;
-import com.geml.taska.service.AsyncLogService.LogCreationStatus;
 import com.geml.taska.service.AsyncLogService.LogStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +19,9 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,17 +54,17 @@ public class LogController {
     @Operation(summary = "Создать лог файл асинхронно", description = "Создает лог файл асинхронно и возвращает ID задачи.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "202", description = "Задача на создание лог файла принята",
-            content = @Content(mediaType = "application/json", schema = @Schema(type = "string", format = "UUID"))),
+            content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "UUID"))),
         @ApiResponse(responseCode = "500", description = "Ошибка при создании задачи", content = @Content)
     })
     @PostMapping("/{date}")
-    public ResponseEntity<UUID> createLogFileAsync(
+    public CompletableFuture<ResponseEntity<String>> createLogFileAsync(
         @Parameter(description = "Дата лога в формате YYYY-MM-DD", example = "2023-10-27") @PathVariable String date
     ) {
         try {
             LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
-            UUID logId = asyncLogService.createLogFileAsync(logDate);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(logId);
+            return asyncLogService.createLogFileAsync(logDate)
+                .thenApply(logId -> ResponseEntity.status(HttpStatus.ACCEPTED).body(logId));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating log file task", e);
         }
@@ -208,34 +211,29 @@ public class LogController {
     public ResponseEntity<Resource> getLogFileByLogId(
         @Parameter(description = "ID задачи на создание лог файла", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479") @PathVariable UUID logId
     ) {
-        LogCreationStatus status = asyncLogService.getLogCreationStatusFull(logId);
-        if (status.getStatus() != LogStatus.COMPLETED) {
+        LogFile logFile = asyncLogService.getLogFile(logId);
+        if (logFile == null || logFile.getStatus() != LogStatus.COMPLETED) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Log file not ready or task not found");
         }
 
-        String filePath = status.getFilePath();
+        String filePath = logFile.getFilePath();
         if (filePath == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File path not available");
         }
 
-        Path logFilePath = Paths.get(filePath);
-        if (!Files.exists(logFilePath)) {
+        File file = new File(filePath);
+        if (!file.exists()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Log file not found");
         }
 
-        try {
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(logFilePath));
+        Resource resource = new FileSystemResource(file);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
+        headers.setContentType(MediaType.TEXT_PLAIN);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + logFilePath.getFileName());
-            headers.setContentType(MediaType.TEXT_PLAIN);
-
-            return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(Files.size(logFilePath))
-                .body(resource);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading log file", e);
-        }
+        return ResponseEntity.ok()
+            .headers(headers)
+            .contentLength(file.length())
+            .body(resource);
     }
 }

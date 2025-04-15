@@ -1,6 +1,7 @@
 package com.geml.taska.service;
 
 import com.geml.taska.dto.LogCreationStatusDto;
+import com.geml.taska.models.LogFile;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,26 +13,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AsyncLogService {
 
     private static final String LOG_DIRECTORY = "logs/";
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10); // Adjust thread pool size as needed
-    private final Map<UUID, LogCreationStatus> logCreationStatuses = new ConcurrentHashMap<>();
+    private final Map<String, LogFile> logFiles = new ConcurrentHashMap<>();
 
-    public UUID createLogFileAsync(LocalDate date) {
-        UUID logId = UUID.randomUUID();
-        logCreationStatuses.put(logId, new LogCreationStatus(LogStatus.IN_PROGRESS));
+    @Async
+    public CompletableFuture<String> createLogFileAsync(LocalDate date) {
+        String logId = UUID.randomUUID().toString();
+        LogFile logFile = new LogFile(logId);
+        logFiles.put(logId, logFile);
 
-        executorService.submit(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(15000);
 
@@ -39,7 +42,9 @@ public class AsyncLogService {
                 Path logDirectoryPath = Paths.get(LOG_DIRECTORY);
 
                 if (!Files.exists(logDirectoryPath) || !Files.isDirectory(logDirectoryPath)) {
-                    logCreationStatuses.put(logId, new LogCreationStatus(LogStatus.FAILED, "Log directory not found"));
+                    logFile.setStatus(LogStatus.FAILED);
+                    logFile.setErrorMessage("Log directory not found");
+                    log.error("Log directory not found");
                     return;
                 }
 
@@ -47,10 +52,12 @@ public class AsyncLogService {
                     .filter(path -> path.getFileName().toString()
                         .matches(logFileNamePattern.replace(".", "\\.")
                             .replace("*", ".*")))
-                    .collect(Collectors.toList());
+                    .toList();
 
                 if (matchingFiles.isEmpty()) {
-                    logCreationStatuses.put(logId, new LogCreationStatus(LogStatus.FAILED, "Log files not found for date: " + date));
+                    logFile.setStatus(LogStatus.FAILED);
+                    logFile.setErrorMessage("Log files not found for date: " + date);
+                    log.error("Log files not found for date: {}", date);
                     return;
                 }
 
@@ -68,61 +75,31 @@ public class AsyncLogService {
                     }
                 }
 
-                logCreationStatuses.put(logId, new LogCreationStatus(LogStatus.COMPLETED, null, combinedLogFilePath.toString()));
+                logFile.setStatus(LogStatus.COMPLETED);
+                logFile.setFilePath(combinedLogFilePath.toString());
             } catch (IOException | InterruptedException e) {
-                logCreationStatuses.put(logId, new LogCreationStatus(LogStatus.FAILED, e.getMessage()));
+                logFile.setStatus(LogStatus.FAILED);
+                logFile.setErrorMessage(e.getMessage());
+                log.error("Error creating log file", e);
             }
         });
 
-        return logId;
+        return CompletableFuture.completedFuture(logId);
     }
 
     public LogCreationStatusDto getLogCreationStatus(UUID logId) {
-        LogCreationStatus status = logCreationStatuses.getOrDefault(logId, new LogCreationStatus(LogStatus.NOT_FOUND));
-        return new LogCreationStatusDto(status.getStatus(), status.getErrorMessage());
+        LogFile logFile = logFiles.get(logId.toString());
+        if (logFile == null) {
+            return new LogCreationStatusDto(LogStatus.NOT_FOUND, "Log file not found");
+        }
+        return new LogCreationStatusDto(logFile.getStatus(), logFile.getErrorMessage());
     }
 
-    public LogCreationStatus getLogCreationStatusFull(UUID logId) {
-        return logCreationStatuses.getOrDefault(logId, new LogCreationStatus(LogStatus.NOT_FOUND));
+    public LogFile getLogFile(UUID logId) {
+        return logFiles.get(logId.toString());
     }
 
     public enum LogStatus {
         IN_PROGRESS, COMPLETED, FAILED, NOT_FOUND
-    }
-
-    public static class LogCreationStatus {
-        private final LogStatus status;
-        private final String errorMessage;
-        private final String filePath;
-
-        public LogCreationStatus(LogStatus status) {
-            this.status = status;
-            this.errorMessage = null;
-            this.filePath = null;
-        }
-
-        public LogCreationStatus(LogStatus status, String errorMessage) {
-            this.status = status;
-            this.errorMessage = errorMessage;
-            this.filePath = null;
-        }
-
-        public LogCreationStatus(LogStatus status, String errorMessage, String filePath) {
-            this.status = status;
-            this.errorMessage = errorMessage;
-            this.filePath = filePath;
-        }
-
-        public LogStatus getStatus() {
-            return status;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        public String getFilePath() {
-            return filePath;
-        }
     }
 }
