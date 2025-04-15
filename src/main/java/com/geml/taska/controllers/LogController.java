@@ -1,5 +1,9 @@
 package com.geml.taska.controllers;
 
+import com.geml.taska.dto.LogCreationStatusDto;
+import com.geml.taska.service.AsyncLogService;
+import com.geml.taska.service.AsyncLogService.LogCreationStatus;
+import com.geml.taska.service.AsyncLogService.LogStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +41,48 @@ public class LogController {
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
     private static final DateTimeFormatter DATE_FORMATTER =
         DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+
+    private final AsyncLogService asyncLogService;
+
+    public LogController(AsyncLogService asyncLogService) {
+        this.asyncLogService = asyncLogService;
+    }
+
+    @Operation(summary = "Создать лог файл асинхронно", description = "Создает лог файл асинхронно и возвращает ID задачи.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "202", description = "Задача на создание лог файла принята",
+            content = @Content(mediaType = "application/json", schema = @Schema(type = "string", format = "UUID"))),
+        @ApiResponse(responseCode = "500", description = "Ошибка при создании задачи", content = @Content)
+    })
+    @PostMapping("/{date}")
+    public ResponseEntity<UUID> createLogFileAsync(
+        @Parameter(description = "Дата лога в формате YYYY-MM-DD", example = "2023-10-27") @PathVariable String date
+    ) {
+        try {
+            LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+            UUID logId = asyncLogService.createLogFileAsync(logDate);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(logId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating log file task", e);
+        }
+    }
+
+    @Operation(summary = "Получить статус создания лог файла", description = "Возвращает статус создания лог файла по ID задачи.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Статус успешно получен",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LogCreationStatusDto.class))),
+        @ApiResponse(responseCode = "404", description = "Задача не найдена", content = @Content)
+    })
+    @GetMapping("/status/{logId}")
+    public ResponseEntity<LogCreationStatusDto> getLogCreationStatus(
+        @Parameter(description = "ID задачи на создание лог файла", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479") @PathVariable UUID logId
+    ) {
+        LogCreationStatusDto status = asyncLogService.getLogCreationStatus(logId);
+        if (status.getStatus() == LogStatus.NOT_FOUND) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Log creation task not found");
+        }
+        return ResponseEntity.ok(status);
+    }
 
     @Operation(summary = "Получить лог файл по дате и ротации", description = "Возвращает лог файл за указанную дату и номер ротации.")
     @ApiResponses(value = {
@@ -146,6 +194,48 @@ public class LogController {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Error reading log files", e
             );
+        }
+    }
+
+    @Operation(summary = "Получить готовый лог файл по ID задачи", description = "Возвращает готовый лог файл по ID задачи.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Лог файл успешно получен",
+            content = @Content(mediaType = "text/plain", schema = @Schema(type = "string", format = "binary"))),
+        @ApiResponse(responseCode = "404", description = "Задача не найдена или лог файл не готов", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Ошибка при чтении лог файла", content = @Content)
+    })
+    @GetMapping("/file/{logId}")
+    public ResponseEntity<Resource> getLogFileByLogId(
+        @Parameter(description = "ID задачи на создание лог файла", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479") @PathVariable UUID logId
+    ) {
+        LogCreationStatus status = asyncLogService.getLogCreationStatusFull(logId);
+        if (status.getStatus() != LogStatus.COMPLETED) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Log file not ready or task not found");
+        }
+
+        String filePath = status.getFilePath();
+        if (filePath == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File path not available");
+        }
+
+        Path logFilePath = Paths.get(filePath);
+        if (!Files.exists(logFilePath)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Log file not found");
+        }
+
+        try {
+            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(logFilePath));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + logFilePath.getFileName());
+            headers.setContentType(MediaType.TEXT_PLAIN);
+
+            return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(Files.size(logFilePath))
+                .body(resource);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading log file", e);
         }
     }
 }
