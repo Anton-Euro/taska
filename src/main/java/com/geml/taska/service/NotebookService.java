@@ -54,33 +54,34 @@ public class NotebookService {
     }
 
 
-    public List<DisplayNotebookDto> getAllNotebooks() {
+    public List<DisplayNotebookDto> getAllNotebooks(Long taskId) {
         List<DisplayNotebookDto> cachedNotebooks = cacheConfig.getAllNotebooks();
-        if (cachedNotebooks != null) {
+        if (cachedNotebooks != null && taskId == null) {
             log.debug("Getting all notebooks from cache");
             return cachedNotebooks;
         }
 
         log.debug("Getting all notebooks from database");
-        List<DisplayNotebookDto> notebooks = notebookRepository.findAll().stream()
+        List<Notebook> notebooks;
+        if (taskId != null) {
+            notebooks = notebookRepository.findByTaskIdFilter(taskId);
+        } else {
+            notebooks = notebookRepository.findAll();
+        }
+        List<DisplayNotebookDto> displayNotebooks = notebooks.stream()
                 .map(notebookMapper::toDisplayNotebookDto).toList();
-        cacheConfig.putAllNotebooks(notebooks);
-        return notebooks;
+        if (taskId == null) {
+            cacheConfig.putAllNotebooks(displayNotebooks);
+        }
+        return displayNotebooks;
     }
 
-    public List<DisplayNotebookFullDto> getAllNotebooksFullWithCache() {
-        List<DisplayNotebookFullDto> cachedNotebooks = cacheConfig.getAllNotebooksFull();
-        if (cachedNotebooks != null) {
-            log.debug("Getting all full notebooks from cache");
-            return cachedNotebooks;
-        }
-        log.debug("Getting all full notebooks from database");
-        List<DisplayNotebookFullDto> notebooks = notebookRepository.findAll().stream()
-            .map(notebookMapper::toDisplayNotebookFullDto).toList();
- 
-        cacheConfig.putAllNotebooksFull(notebooks);
-        return notebooks;
+    public List<DisplayNotebookFullDto> getAllNotebooksFull(Long taskId) {
+        List<Object[]> results;
+        results = notebookRepository.findAllNotebooksFullWithTagAndTaskFilter(taskId);
+        return processResults(results);
     }
+    
     
 
     public List<DisplayNotebookFullDto> getAllNotebooksFull(String tagName) {

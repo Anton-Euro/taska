@@ -39,15 +39,17 @@ public class NotebookController {
     }
 
 
-    @Operation(summary = "Get all notebooks", description = "Retrieve a list of all notebooks.")
+    @Operation(summary = "Get all notebooks", description = "Retrieve a list of all notebooks. Optionally filter by taskId.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list",
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = DisplayNotebookDto.class)))
     })
     @GetMapping
-    public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks() {
-        return ResponseEntity.ok(notebookService.getAllNotebooks());
+    public ResponseEntity<List<DisplayNotebookDto>> getAllNotebooks(
+        @Parameter(description = "Task ID to filter by", example = "1") @RequestParam(required = false) Long taskId
+    ) {
+        return ResponseEntity.ok(notebookService.getAllNotebooks(taskId));
     }
 
 
@@ -58,8 +60,10 @@ public class NotebookController {
                 schema = @Schema(implementation = DisplayNotebookFullDto.class)))
     })
     @GetMapping("/all")
-    public ResponseEntity<List<DisplayNotebookFullDto>> getAllNotebooksFull() {
-        return ResponseEntity.ok(notebookService.getAllNotebooksFullWithCache());
+    public ResponseEntity<List<DisplayNotebookFullDto>> getAllNotebooksFull(
+        @Parameter(description = "Task ID to filter by", example = "1") @RequestParam(required = false) Long taskId
+    ) {
+        return ResponseEntity.ok(notebookService.getAllNotebooksFull(taskId));
     }
 
     @Operation(summary = "Get all notebooks with full details by tag", 

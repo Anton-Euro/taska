@@ -3,6 +3,7 @@ package com.geml.taska.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -106,7 +107,7 @@ class NotebookServiceTest {
         when(notebookMapper.toDisplayNotebookDto(any(Notebook.class))).thenReturn(displayNotebookDto);
         doNothing().when(cacheConfig).putAllNotebooks(anyList());
 
-        List<DisplayNotebookDto> result = notebookService.getAllNotebooks();
+        List<DisplayNotebookDto> result = notebookService.getAllNotebooks(null);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -120,7 +121,7 @@ class NotebookServiceTest {
         List<DisplayNotebookDto> notebooks = List.of(displayNotebookDto);
         when(cacheConfig.getAllNotebooks()).thenReturn(notebooks);
 
-        List<DisplayNotebookDto> result = notebookService.getAllNotebooks();
+        List<DisplayNotebookDto> result = notebookService.getAllNotebooks(null);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -130,60 +131,18 @@ class NotebookServiceTest {
     }
 
     @Test
-    void getAllNotebooksFullWithCacheReturnsAllNotebooks() {
+    void getAllNotebooksByTaskIdReturnsFilteredNotebooks() {
         List<Notebook> notebooks = List.of(notebook);
-        DisplayNotebookFullDto displayNotebookFullDto = new DisplayNotebookFullDto();
-        displayNotebookFullDto.setId(1L);
-        displayNotebookFullDto.setTitle("Test Notebook");
-        displayNotebookFullDto.setContent("Test Content");
-        when(cacheConfig.getAllNotebooksFull()).thenReturn(null);
-        when(notebookRepository.findAll()).thenReturn(notebooks);
-        when(notebookMapper.toDisplayNotebookFullDto(any(Notebook.class))).thenReturn(displayNotebookFullDto);
-        doNothing().when(cacheConfig).putAllNotebooksFull(anyList());
+        when(notebookRepository.findByTaskIdFilter(anyLong())).thenReturn(notebooks);
+        when(notebookMapper.toDisplayNotebookDto(any(Notebook.class))).thenReturn(displayNotebookDto);
 
-        List<DisplayNotebookFullDto> result = notebookService.getAllNotebooksFullWithCache();
+        List<DisplayNotebookDto> result = notebookService.getAllNotebooks(1L);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals(displayNotebookFullDto, result.get(0));
-        verify(notebookRepository, times(1)).findAll();
-        verify(cacheConfig, times(1)).putAllNotebooksFull(anyList());
-    }
-
-    @Test
-    void getAllNotebooksFullWithCacheReturnsAllNotebooksFromCache() {
-        DisplayNotebookFullDto displayNotebookFullDto = new DisplayNotebookFullDto();
-        displayNotebookFullDto.setId(1L);
-        displayNotebookFullDto.setTitle("Test Notebook");
-        displayNotebookFullDto.setContent("Test Content");
-        List<DisplayNotebookFullDto> notebooks = List.of(displayNotebookFullDto);
-        when(cacheConfig.getAllNotebooksFull()).thenReturn(notebooks);
-
-        List<DisplayNotebookFullDto> result = notebookService.getAllNotebooksFullWithCache();
-
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertEquals(displayNotebookFullDto, result.get(0));
-        verify(notebookRepository, never()).findAll();
-        verify(cacheConfig, never()).putAllNotebooksFull(anyList());
-    }
-
-    @Test
-    void getAllNotebooksFullReturnsFilteredNotebooks() {
-        List<Object[]> results = new ArrayList<>();
-        Object[] row = new Object[]{1L, "Test Notebook", "Test Content", 1L, "Test Tag", 1L, "Test Task"};
-        results.add(row);
-        when(notebookRepository.findAllNotebooksFullWithTagFilter(anyString())).thenReturn(results);
-
-        List<DisplayNotebookFullDto> result = notebookService.getAllNotebooksFull("Test Tag");
-
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertNotNull(result.get(0).getTags());
-        assertEquals(1, result.get(0).getTags().size());
-        assertEquals("Test Tag", result.get(0).getTags().iterator().next().getName());
-        assertEquals("Test Task", result.get(0).getTask().getTitle());
-        verify(notebookRepository, times(1)).findAllNotebooksFullWithTagFilter(anyString());
+        assertEquals(displayNotebookDto, result.get(0));
+        verify(notebookRepository, times(1)).findByTaskIdFilter(anyLong());
+        verify(cacheConfig, never()).putAllNotebooks(anyList());
     }
 
     @Test
@@ -280,7 +239,7 @@ class NotebookServiceTest {
     @Test
     void createNotebookNonExistingTaskThrowsNotFound() {
         createNotebookDto.setTaskId(999L);
-        
+
         when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> notebookService.createNotebook(createNotebookDto));
@@ -292,7 +251,7 @@ class NotebookServiceTest {
     @Test
     void createNotebookNonExistingTagThrowsNotFound() {
         createNotebookDto.setTagIds(Set.of(999L));
-        
+
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> notebookService.createNotebook(createNotebookDto));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -331,7 +290,7 @@ class NotebookServiceTest {
     @Test
     void updateNotebookEmptyTitleThrowsValidationException() {
         createNotebookDto.setTitle("");
-        
+
         assertThrows(ValidationException.class, () -> notebookService.updateNotebook(1L, createNotebookDto));
 
         verify(notebookRepository, never()).save(any(Notebook.class));
@@ -340,7 +299,7 @@ class NotebookServiceTest {
     @Test
     void updateNotebookEmptyContentThrowsValidationException() {
         createNotebookDto.setContent("");
-        
+
         assertThrows(ValidationException.class, () -> notebookService.updateNotebook(1L, createNotebookDto));
 
         verify(notebookRepository, never()).save(any(Notebook.class));
@@ -381,7 +340,7 @@ class NotebookServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(notebookRepository, never()).deleteById(anyLong());
     }
-    
+
     @Test
     void invalidateNotebookCacheRemovesAllCache() {
         doNothing().when(cacheConfig).removeAllNotebooks();
@@ -391,5 +350,43 @@ class NotebookServiceTest {
 
         verify(cacheConfig, times(1)).removeAllNotebooks();
         verify(cacheConfig, times(1)).removeAllNotebooksFull();
+    }
+
+    @Test
+    void getAllNotebooksFullByTagNameReturnsFilteredNotebooks() {
+        List<Object[]> results = new ArrayList<>();
+        Object[] row = new Object[]{1L, "Test Notebook", "Test Content", 1L, "Test Tag", null, null};
+        results.add(row);
+        when(notebookRepository.findAllNotebooksFullWithTagFilter(anyString())).thenReturn(results);
+
+        List<DisplayNotebookFullDto> result = notebookService.getAllNotebooksFull("Test Tag");
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0).getTags());
+        assertEquals(1, result.get(0).getTags().size());
+        assertEquals("Test Tag", result.get(0).getTags().iterator().next().getName());
+        assertNull(result.get(0).getTask());
+        verify(notebookRepository, times(1)).findAllNotebooksFullWithTagFilter(anyString());
+    }
+
+    @Test
+    void getAllNotebooksFullByTaskIdReturnsFilteredNotebooks() {
+        List<Object[]> results = new ArrayList<>();
+        Object[] row = new Object[]{1L, "Test Notebook", "Test Content", 1L, "Test Tag", 1L, "Test Task"};
+        results.add(row);
+        when(notebookRepository.findAllNotebooksFullWithTagAndTaskFilter(anyLong())).thenReturn(results);
+
+        List<DisplayNotebookFullDto> result = notebookService.getAllNotebooksFull(1L);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0).getTags());
+        assertEquals(1, result.get(0).getTags().size());
+        assertEquals("Test Tag", result.get(0).getTags().iterator().next().getName());
+        assertNotNull(result.get(0).getTask());
+        assertEquals(1L, result.get(0).getTask().getId());
+        assertEquals("Test Task", result.get(0).getTask().getTitle());
+        verify(notebookRepository, times(1)).findAllNotebooksFullWithTagAndTaskFilter(anyLong());
     }
 }
