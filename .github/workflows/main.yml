@@ -29,7 +29,9 @@ jobs:
         run: ./gradlew test
 
   deploy:
+    needs: test
     runs-on: ubuntu-latest
+    if: success()
 
     steps:
       - name: Checkout repository
