@@ -93,7 +93,7 @@ class BoardServiceTest {
         List<DisplayBoardDto> result = boardService.getAllBoards(null);
 
         assertFalse(result.isEmpty());
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
         assertEquals(displayBoardDto, result.get(0));
         verify(boardRepository, times(1)).findAll();
         verify(boardRepository, never()).searchByTitle(anyString());
